@@ -1,77 +1,78 @@
 import React, { Component } from 'react';
+import ColumnList from './ColumnList';
 import logo from './logo.svg';
 import './App.css';
-import ColumnList from './ColumnList'
 
 class App extends Component {
-  state = {
-    tasks: []
-  }
-  componentWillMount(){
-    const toDoListTasks = window.localStorage.getItem('toDoListTasks') || '[]'
-    console.log('todolist: ', toDoListTasks)
-    this.setState({tasks: JSON.parse(toDoListTasks)})
-  }
-  updateLocaStorage(tasks){
-    const stringfiedTasks = JSON.stringify(tasks)
-    window.localStorage.setItem('toDoListTasks', stringfiedTasks)
-  }
-
-  addTask(e){
-    e.preventDefault()
-    
-    let {tasks} = this.state
-    const value = e.target.querySelector('input').value
-    const newTask = {
-      id: tasks.length + 1,
-      description: value,
-      status: 'To do'
+  constructor(props) {
+    super(props);
+    this.state = {
+      items: []
     }
-    tasks = tasks.concat(newTask)
-    this.updateLocaStorage(tasks)
-    this.setState({tasks})
+    this.updateTask = this.updateTask.bind(this);
+    this.addTask = this.addTask.bind(this);
   }
 
-  updateTask(target, task){
-    let { tasks } = this.state
-    tasks = tasks.filter(t => t.id !== task.id).concat({
-      id: task.id,
-      description:task.description,
-      status: target.checked ? 'Done': 'To do'
-    })
-    this.updateLocaStorage(tasks)
-    this.setState({tasks})
+  componentWillMount() {
+    const toDoListItems = window.localStorage.getItem('toDoListItems') || '[]';
+    this.setState({ items: JSON.parse(toDoListItems) });
   }
+
+  updateLocalStorage(items) {
+    window.localStorage.setItem('toDoListItems', JSON.stringify(items));
+  }
+
+  addTask(e) {
+    e.preventDefault();
+    const value = e.target.querySelector('input').value;
+    this.setState(prev => {
+      const { items = [] } = prev;
+      const newTask = {
+        id: items.length + 1,
+        title: value,
+        status: 'To Do'
+      };
+      items.push(newTask)
+      this.updateLocalStorage(items);
+      return { items: items };
+    });
+  }
+
+  updateTask(target, task) {
+    this.setState(function (state, b) {
+      const { items = [] } = state;
+      const s = items.filter(_ => _.id !== task.id);
+      task.status = target.checked ? 'Done' : 'To Do';
+      s.push(task);
+      this.updateLocalStorage(s);
+      return { items: s };
+    });
+  }
+
   render() {
-    const {tasks} = this.state
-
+    const { items } = this.state;
     const columns = [
-      { title: 'To do', tasks },
-      { title: 'Done', tasks }
-    ]
-
+      { title: 'To Do', items },
+      { title: 'Done', items }
+    ];
 
     return (
       <div className="App">
         <div className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">To do List</h1>
+          <h2>To Do List</h2>
         </div>
-        <div>
-          <div className='App-container'>
-            <div className='app-lists'>
-              {columns.map(column => (
-                <ColumnList
-                  key={column.title}
-                  columnTitle={column.title}
-                  tasks={column.tasks}
-                  addTask={(e)=> this.addTask(e)}
-                  updateTask={(target, task)=> this.updateTask(target, task )}
-                  />
-              ))}
-
-
-            </div>
+        <div className="App-container">
+          <div className="app-lists">
+            {columns.map(item => (
+              <ColumnList
+                key={item.title}
+                title={item.title}
+                items={item.items}
+                updateTask={this.updateTask}
+                addTask={this.addTask}
+              />
+            ))}
           </div>
         </div>
       </div>
