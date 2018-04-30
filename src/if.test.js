@@ -3,7 +3,7 @@ import {shallow } from 'enzyme'
 import If from './If'
 
 describe('<If />', () => {
-    it('shallow if without crash', ()=>{
+    it('shallow If without crash', ()=>{
         expect(shallow(<If/>))
     })
 })

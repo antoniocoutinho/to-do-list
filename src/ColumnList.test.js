@@ -24,4 +24,13 @@ describe('<ColumnList/>', () => {
 
         expect(wrapper.find('li').length).toBe(1)
     })
+
+    it('expects updateTask to be called on checkbox change', () => {
+        const updateTask = jest.fn()
+
+        const wrapper = mount(<ColumnList title="To Do" items={items} updateTask={updateTask}/>)
+        wrapper.find('input[type="checkbox"]').simulate('change')
+        expect(updateTask).toHaveBeenCalledTimes(1)
+
+    })
 })
